@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Mongogx</title>
+<script type="application/javascript" src="collection.mongogx.js"></script>
+<script type="application/javascript" src="database.mongogx.js"></script>
+<script type="application/javascript" src="core.mongogx.js"></script>
+<script type="application/javascript">
+	
+
+	let mongogx = new OGX.Mongogx();
+	
+	mongogx.createDatabase('my_project');	
+	mongogx.setDatabase('my_project');	
+	
+	mongogx.createCollection('users');		
+	
+	mongogx.setCollection('users');		
+	
+
+	
+	
+	mongogx.insert({first_name:'Eric', age:42, sex:'male', location:{state:'ON', city:'Toronto'}, favorites:{meals:[{name:'pizza'}, {name:'pasta'}]}});
+	mongogx.insert({first_name:'Tania', age:38, sex:'female', location:{state:'ON', city:'Toronto'}});
+	mongogx.insert({first_name:'Julien', age:45, sex:'male', location:{state:null, city:'Stockholm'}});
+	mongogx.insert({first_name:'George', age:55, sex:'male', location:{state:'QC', city:'Montreal'}, arts:{martial:['kickboxing', 'wresting']}});
+	
+		
+	
+	/*
+	console.log(mongogx.find({'location.state':'ON'}));
+	
+	console.log(mongogx.find({age:42}));
+	
+	console.log(mongogx.find({age:{$gt:20}}));
+	
+	console.log(mongogx.find({age:{gt:20}, sex:'male', 'location.city':'Toronto'}));
+	
+	console.log(mongogx.find({'favorites.meals.name':'pizza'}));
+	
+	console.log(mongogx.find({'favorites.meals.1.name':'pasta'}));
+	*/
+	
+	console.log(mongogx.find({'arts.martial':{'$in':'kickboxing'}}));
+	
+	/*
+	batchInsert();
+	let start =  new Date().getTime();
+	let users = mongogx.find({'city':'Paris', 'age':{'$gt':20}}, 10);
+	let end =  new Date().getTime();
+	console.log('FIND TIME', (end-start), 'ms', users);
+	
+	
+	function batchInsert(){
+		let start, end;
+		start = new Date().getTime();
+		let user;
+		let names = ['Eric', 'Tania', 'Frank', 'Julien', 'Jennifer', 'Thomas', 'Jessica', 'Joe', 'Stacy', 'Brad'];
+		var cities = ['Toronto', 'New York', 'Las Vegas', 'Paris', 'London', 'Madrid', 'Los Angeles'];		
+		for(let i = 0; i < 10000; i++){
+			user = {first_name:names[Math.floor(Math.random()*names.length)], age:10+Math.round(Math.random()*50), city:cities[Math.floor(Math.random()*cities.length)]};
+			mongogx.insert(user);
+		}
+		end = new Date().getTime();
+		console.log('INSERT TIME', (end-start), 'ms');
+	}	
+	*/
+	
+	/*
+	states.$.cities.$.area_codes.$.code = 416;
+	
+	
+	states:{
+		ontario:{
+			cities:[
+				{name:toronto, area_codes:[{code:416, code:905}]}, {name:markham}
+			]
+		}
+	}
+	*/
+	
+</script>
+</head>
+
+
+<body>
+</body>
+</html>
