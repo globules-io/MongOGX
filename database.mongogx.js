@@ -9,6 +9,7 @@ OGX.MongogxDatabase = class{
 		this.name = __name;		
 		this.collection = null;
 		this.collections = __data;
+        this._initCollections();
 		if(typeof(__collection_name) !== 'undefined'){
 			this.setCollection(__collection_name);
 		}
@@ -59,13 +60,13 @@ OGX.MongogxDatabase = class{
 		return this.collections.hasOwnProperty(__name);
 	}
 	
-	initCollections(){
+	_initCollections(){
 		for(let a in this.collections){
 			this.collections[a] = new OGX.MongogxCollection(a, this.collections[a]);
 		}
 	}
 	
 	toJSON(){
-		return JSON.stringify(this.collections);
+		return this.collections;
 	}
 };
