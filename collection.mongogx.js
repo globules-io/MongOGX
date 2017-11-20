@@ -4,9 +4,10 @@ if(typeof(OGX) === 'undefined'){
 }
 OGX.MongogxCollection = class{
 	
-	constructor(__name, __data){		
+	constructor(__name, __data){
 		this.name = __name;
 		this.data = __data;
+        this._initDocuments();
 	}
 	
 	get collection(){
@@ -115,7 +116,7 @@ OGX.MongogxCollection = class{
 	}
 	
 	//find all documents matchin that query 1st
-	find(__query, __limit){	
+	find(__query, __limit){	        
 		typeof(__limit)==='undefined'?__limit=0:null;
 		let match, path, base, matched;
 		let docs = {};
@@ -217,14 +218,13 @@ OGX.MongogxCollection = class{
 	toJSON(){
 		let json = [];
 		for(let a in this.data){
-			json.push(this.data);
+			json.push(this.data[a]);
 		}
-		return JSON.stringify(json);
+		return json;
 	}	
 	
 	/*INTERNAL STUFF*/	
 	_handleOp(__obj_value, __value){
-		//console.log('handle', __obj_value, __value);
 		let match = true;
 		let oper;
 		if(typeof(__value) === 'object'){
@@ -257,8 +257,6 @@ OGX.MongogxCollection = class{
 						break;
 							
 						case 'in':
-						//could be an array here: to do 	
-						//in in array is value or value
 						if(Array.isArray(__value[op])){
 							for(let i = 0; i < __value[op].length; i++){
 								match = (__obj_value.indexOf(__value[op][i]) !== -1);
@@ -418,6 +416,14 @@ OGX.MongogxCollection = class{
 		}
 		return match;
 	}
+    
+    _initDocuments(){
+        let docs = {};
+        for(let a in this.data){           
+            docs[this.data[a]._id] = this.data[a];
+        }
+        this.data = docs;
+    }
 	
 	_genMongoId(){		
 		let rnd = Math.floor(new Date().getTime()/1000).toString(16);
