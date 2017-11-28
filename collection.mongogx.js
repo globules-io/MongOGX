@@ -84,8 +84,8 @@ OGX.MongogxCollection = class{
 		let collection = this.find(__query, 1);
 		if(collection){
 			for(let _id in collection){
-				collection[__object._id] = __object;
-				delete collection[_id];
+				this.data[__object._id] = __object;
+				delete this.data[_id];
 				return true;				
 			}
 		}
@@ -96,7 +96,7 @@ OGX.MongogxCollection = class{
 		let collection = this.find(__query, 1);
 		if(collection){
 			for(let _id in collection){			
-				delete collection[_id];
+				delete this.data[_id];
 				return true;				
 			}
 		}
@@ -108,7 +108,7 @@ OGX.MongogxCollection = class{
 		let collection = this.find(__query);
 		if(collection){
 			for(let _id in collection){			
-				delete collection[_id];	
+				delete this.data[_id];	
 				matched++;
 			}
 		}
