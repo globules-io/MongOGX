@@ -63,6 +63,7 @@ OGX.Mongogx = class{
 			return false;
 		}
 		this.data.db[__name] = new OGX.MongogxDatabase(__name, {});
+		this._write();
 		return true;
 	}
 	
@@ -71,6 +72,7 @@ OGX.Mongogx = class{
 			return false;
 		}
 		delete this.data.db[__name];
+		this._write();
 		return true;
 	}
 	
@@ -107,7 +109,12 @@ OGX.Mongogx = class{
 		if(!this.database){
 			return false;
 		}
-		return this.data.db[this.database].deleteCollection(__name);
+		let del = this.data.db[this.database].deleteCollection(__name);
+		if(del){
+			this._write();
+			return del;
+		}
+		return false;
 	}
 	
 	/*QUERY/OPERATIONS*/
@@ -199,7 +206,7 @@ OGX.Mongogx = class{
 	deleteMany(__query){
 		if(this._isSet()){		
 			let del = this.data.db[this.database].getCollection().deleteMany(__query);
-            if(del){
+            if(del){				
                 this._write();
                 return del;  
             }
