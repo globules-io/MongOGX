@@ -9,7 +9,7 @@ OGX.Mongogx = class{
 		this.database = null;
 		this.data = null;
         this.options = null;
-        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}};
+        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, callback:function(){}};
         if(typeof(__options) === 'undefined'){
             __options = {};
         }
@@ -19,13 +19,7 @@ OGX.Mongogx = class{
             }
         }
         this.options = __options;
-		this._loadData();
-		this._initDatabases();       
-		if(typeof(__database) !== 'undefined'){
-			if(this.setDatabase(__database) && typeof(__collection) !== 'undefined'){
-				this.setCollection(__collection);
-			}			
-		}        
+		this._loadData();         
 	}
     
     /*CONSTANTS*/
@@ -222,13 +216,14 @@ OGX.Mongogx = class{
 	}
 	
 	/*INTERNAL STUFF*/
-	_loadData(){
+	_loadData(__database, __collection){
         let that = this;
         switch(this.options.storage){
             case OGX.Mongogx.APP_STORAGE:
-            this._readFile('mongogx.data', function(){
+            this._readFile('mongogx.data', function(__data){
                 that.data = JSON.parse(__data);	
-                that._write();
+                that._write(); 
+                that._initDatabases(__database, __collection);                 
             });            
             break;                
                 
@@ -238,16 +233,25 @@ OGX.Mongogx = class{
                 this.data = JSON.parse(data);	                
             }else{
                 this.data = JSON.parse(JSON.stringify(this.data_default));
-                this._write();
+                this._write();                       
             }
+            this._initDatabases(__database, __collection);          
             break;
-        }      	
+        }        
 	}   
 	
-	_initDatabases(){
+	_initDatabases(__database, __collection){
 		for(let a in this.data.db){           
 			this.data.db[a] = new OGX.MongogxDatabase(a, this.data.db[a]);             
-		}       
+		}  
+        if(typeof(__database) !== 'undefined'){
+            if(this.setDatabase(__database) && typeof(__collection) !== 'undefined'){
+                this.setCollection(__collection);
+            }			
+        } 
+        if(this.options.storage === OGX.Mongogx.APP_STORAGE){
+            this.options.callback();
+        }
 	}		
 	
 	_write(){
@@ -279,8 +283,7 @@ OGX.Mongogx = class{
     _writeFile(__filename, __data, __cb){
 	    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(__dir){
 	        __dir.getFile(__filename, {create:true}, function(__file){            
-	            __file.createWriter(function(__fileWriter){
-	                //fileWriter.seek(fileWriter.length);         
+	            __file.createWriter(function(__fileWriter){     
 	                let blob = new Blob([__data], {type:'text/plain'});
 	                __fileWriter.write(blob);
 	                if(typeof(__cb) !== 'undefined'){
@@ -291,20 +294,21 @@ OGX.Mongogx = class{
 	    });   
     }
 
-    _readFile(__filename, __cb){       
+    _readFile(__filename, __cb){    
         window.resolveLocalFileSystemURL(cordova.file.dataDirectory+__filename, function(__ref){
              __ref.file(function(__file){
                 let reader = new FileReader();
-                reader.onloadend = function(){          
+                reader.onloadend = function(){      
                     __cb(this.result); 
                 };
                 reader.readAsText(__file);
             });   
-        }, this._onReadFail);       
+        }, () => this._onReadFail());       
     }
 
     _onReadFail(__file_error){
         this.data = JSON.parse(JSON.stringify(this.data_default));
         this._writeFile('mongogx.data', JSON.stringify(this.data_default));
+        this._initDatabases();
     }     
 };
