@@ -9,7 +9,7 @@ OGX.Mongogx = class{
 		this.database = null;
 		this.data = null;
         this.options = null;
-        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, callback:function(){}};
+        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, format:OGX.Mongogx.FORMAT_ARRAY, callback:function(){}};
         if(typeof(__options) === 'undefined'){
             __options = {};
         }
@@ -19,7 +19,7 @@ OGX.Mongogx = class{
             }
         }
         this.options = __options;
-		this._loadData();         
+		this._loadData(__database, __collection);         
 	}
     
     /*CONSTANTS*/
@@ -34,6 +34,14 @@ OGX.Mongogx = class{
     static get WRITE_DIRECT(){
         return 'writeDirect';    
     }
+    
+    static get FORMAT_OBJECT(){
+        return 0;
+    }
+    
+    static get FORMAT_ARRAY(){
+        return 1;
+    }
 	
 	/*DATABASES*/		
 	setDatabase(__name){
@@ -46,8 +54,8 @@ OGX.Mongogx = class{
 	
 	getDatabases(){
 		let names = [];
-		for(let a in this.data.db){
-			names.push(a);
+		for(let a in this.data.db){            
+            names.push(a);            
 		}
 		return names;
 	}
@@ -210,12 +218,26 @@ OGX.Mongogx = class{
 	
 	find(__query, __limit){        
 		if(this._isSet()){
-           return this.data.db[this.database].getCollection().find(__query, __limit);
+            let col = this.data.db[this.database].getCollection().find(__query, __limit);
+            if(this.options.format){
+                col = this._objToArr(col);
+            }
+            return col;
 		}
 		return false;
 	}
 	
 	/*INTERNAL STUFF*/
+    _objToArr(__obj){
+        let arr = [];
+        for(let a in __obj){
+            if(__obj.hasOwnProperty(a)){
+                arr.push(__obj[a]);
+            }
+        }
+        return arr;
+    }
+    
 	_loadData(__database, __collection){
         let that = this;
         switch(this.options.storage){
@@ -245,7 +267,18 @@ OGX.Mongogx = class{
 			this.data.db[a] = new OGX.MongogxDatabase(a, this.data.db[a]);             
 		}  
         if(typeof(__database) !== 'undefined'){
-            if(this.setDatabase(__database) && typeof(__collection) !== 'undefined'){
+            /*
+            create db & collection is not existing            
+            */
+            if(!this.data.db.hasOwnProperty(__database)){
+                this.createDatabase(__database);
+            }
+            this.setDatabase(__database);
+            if(typeof(__collection) !== 'undefined'){
+                let col = this.getCollection(__collection);
+                if(!col){
+                    this.createCollection(__collection);
+                }
                 this.setCollection(__collection);
             }			
         } 
