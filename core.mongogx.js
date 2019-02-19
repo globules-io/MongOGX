@@ -9,7 +9,7 @@ OGX.Mongogx = class{
 		this.database = null;
 		this.data = null;
         this.options = null;
-        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, format:OGX.Mongogx.FORMAT_ARRAY, callback:function(){}};
+        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, encryption:false, format:OGX.Mongogx.FORMAT_ARRAY, callback:function(){}};
         if(typeof(__options) === 'undefined'){
             __options = {};
         }
@@ -33,6 +33,10 @@ OGX.Mongogx = class{
     
     static get WRITE_DIRECT(){
         return 'writeDirect';    
+	}
+	
+	static get ENCRYPTION_AES(){
+        return 'AES';    
     }
     
     static get FORMAT_OBJECT(){
@@ -243,6 +247,9 @@ OGX.Mongogx = class{
         switch(this.options.storage){
             case OGX.Mongogx.APP_STORAGE:
             this._readFile('mongogx.data', function(__data){
+				if(that.options.encryption){
+					__data = that._decrypt(__data);
+				}
                 that.data = JSON.parse(__data);	
                 that._write(); 
                 that._initDatabases(__database, __collection);                 
@@ -252,6 +259,9 @@ OGX.Mongogx = class{
             case OGX.Mongogx.LOCAL_STORAGE:
             let data = localStorage.getItem('mongogx');
 		    if(data){
+				if(that.options.encryption){
+					data = that._decrypt(data);
+				}
                 this.data = JSON.parse(data);	                
             }else{
                 this.data = JSON.parse(JSON.stringify(this.data_default));
@@ -288,20 +298,48 @@ OGX.Mongogx = class{
 	}		
 	
 	_write(){
-        let that = this;
+		let that = this;
+		let data = JSON.stringify(that.data);
+		if(this.options.encryption){
+			data = this._encrypt(data);
+		}
         switch(this.options.storage){
             case OGX.Mongogx.APP_STORAGE:
             setTimeout(function(){                
-                that._writeFile('mongogx.data', JSON.stringify(that.data));    
+                that._writeFile('mongogx.data', data);    
             }, that.options.write_concern.delay);   
             break;
                 
             case OGX.Mongogx.LOCAL_STORAGE:
             setTimeout(function(){
-                localStorage.setItem('mongogx', JSON.stringify(that.data));   
+                localStorage.setItem('mongogx', data);   
             }, that.options.write_concern.delay);            
             break;
         }        
+	}
+
+	_encrypt(__json_string){
+		switch(this.options.encryption.scheme){
+			case OGX.Mongogx.ENCRYPTION_AES:
+			return this._encryptAES(__json_string);
+		}	
+	}
+
+	_encryptAES(__json_string){
+		let encrypted = CryptoJS.AES.encrypt(__json_string, this.options.encryption.key, {mode:CryptoJS.mode.CBC, padding:CryptoJS.pad.Pkcs7});
+		return encrypted.toString();
+	}
+
+	_decrypt(__json_string){
+		switch(this.options.encryption.scheme){
+			case OGX.Mongogx.ENCRYPTION_AES:
+			return this._decryptAES(__json_string);
+		}
+	}
+	
+	_decryptAES(__json_string){
+		let decrypted = CryptoJS.AES.decrypt(__json_string, this.options.encryption.key, {mode:CryptoJS.mode.CBC, padding:CryptoJS.pad.Pkcs7});
+		return decrypted.toString(CryptoJS.enc.Utf8);
 	}
 		
 	//db and collections are set
@@ -314,9 +352,12 @@ OGX.Mongogx = class{
 	}
     
     _writeFile(__filename, __data, __cb){
+		if(this.options.encryption){
+			__data = this._encrypt(__data);
+		}
 	    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(__dir){
 	        __dir.getFile(__filename, {create:true}, function(__file){            
-	            __file.createWriter(function(__fileWriter){     
+	            __file.createWriter(function(__fileWriter){  
 	                let blob = new Blob([__data], {type:'text/plain'});
 	                __fileWriter.write(blob);
 	                if(typeof(__cb) !== 'undefined'){
@@ -328,11 +369,16 @@ OGX.Mongogx = class{
     }
 
     _readFile(__filename, __cb){    
+		let that = this;
         window.resolveLocalFileSystemURL(cordova.file.dataDirectory+__filename, function(__ref){
              __ref.file(function(__file){
                 let reader = new FileReader();
-                reader.onloadend = function(){      
-                    __cb(this.result); 
+                reader.onloadend = function(){ 
+					let data = this.result;
+					if(that.options.encryption){
+						data = that._decrypt(data);
+					}     
+                    __cb(data); 
                 };
                 reader.readAsText(__file);
             });   
@@ -340,8 +386,8 @@ OGX.Mongogx = class{
     }
 
     _onReadFail(__file_error){
-        this.data = JSON.parse(JSON.stringify(this.data_default));
-        this._writeFile('mongogx.data', JSON.stringify(this.data_default));
+		this.data = JSON.parse(JSON.stringify(this.data_default));	
+        this._writeFile('mongogx.data', JSON.stringify(this.data));
         this._initDatabases();
     }     
 };

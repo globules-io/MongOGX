@@ -6,9 +6,9 @@ OGX.MongogxCollection = class{
 	
 	constructor(__name, __data){
 		this.name = __name;
-		this.data = __data;        
+		this.data = __data;
         this._initDocuments();
-	}   
+	}
 	
 	get collection(){
 		let json = [];
@@ -209,10 +209,11 @@ OGX.MongogxCollection = class{
 					return docs;
 				}
 			}
-		}        
+		}
 		return docs;
-	}	
-    	
+	}
+	
+		
 	//Return as array
 	toJSON(){
 		let json = [];
@@ -222,7 +223,7 @@ OGX.MongogxCollection = class{
 		return json;
 	}	
 	
-	/*INTERNAL STUFF*/   
+	/*INTERNAL STUFF*/	
 	_handleOp(__obj_value, __value){
 		let match = true;
 		let oper;
