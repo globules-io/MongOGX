@@ -1,4 +1,3 @@
-// JavaScript Document
 if(typeof(OGX) === 'undefined'){
 	var OGX = {};
 }
@@ -178,8 +177,6 @@ OGX.MongogxCollection = class{
 										break;	
 									}
 								}								
-							}else{
-								//console.log('reduce');								
 							}
 						}
 						if(!match){
