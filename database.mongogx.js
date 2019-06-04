@@ -1,8 +1,6 @@
-// JavaScript Document
 if(typeof(OGX) === 'undefined'){
 	var OGX = {};
 }
-//receives a JSON document with all its collections
 OGX.MongogxDatabase = class{	
 	
 	constructor(__name, __data, __collection_name){		
