@@ -9,7 +9,13 @@ OGX.Mongogx = class{
 		this.database = null;
 		this.data = null;
         this.options = null;
-        let options_default = {storage:OGX.Mongogx.LOCAL_STORAGE, write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, encryption:false, format:OGX.Mongogx.FORMAT_ARRAY, callback:function(){}};
+        let options_default = {
+            storage:OGX.Mongogx.LOCAL_STORAGE, 
+            write_concern:{mode:OGX.Mongogx.WRITE_DIRECT, delay:5}, 
+            encryption:false, 
+            format:OGX.Mongogx.FORMAT_ARRAY, 
+            callback:function(){}
+        };
         if(typeof(__options) === 'undefined'){
             __options = {};
         }
@@ -133,7 +139,6 @@ OGX.Mongogx = class{
 	
 	insertOne(__object){
 		if(this._isSet()){
-			let col = this.data.db[this.database].getCollection();
 			let insert = this.data.db[this.database].getCollection().insertOne(__object);            
             if(insert){
                 this._write();
@@ -276,10 +281,7 @@ OGX.Mongogx = class{
 		for(let a in this.data.db){           
 			this.data.db[a] = new OGX.MongogxDatabase(a, this.data.db[a]);             
 		}  
-        if(typeof(__database) !== 'undefined'){
-            /*
-            create db & collection is not existing            
-            */
+        if(typeof(__database) !== 'undefined'){            
             if(!this.data.db.hasOwnProperty(__database)){
                 this.createDatabase(__database);
             }
