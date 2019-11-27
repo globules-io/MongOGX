@@ -1,4 +1,3 @@
-// JavaScript Document
 if(typeof(OGX) === 'undefined'){
 	var OGX = {};
 }
@@ -281,7 +280,7 @@ OGX.Mongogx = class{
 		for(let a in this.data.db){           
 			this.data.db[a] = new OGX.MongogxDatabase(a, this.data.db[a]);             
 		}  
-        if(typeof(__database) !== 'undefined'){            
+        if(typeof(__database) !== 'undefined' && __database){            
             if(!this.data.db.hasOwnProperty(__database)){
                 this.createDatabase(__database);
             }
