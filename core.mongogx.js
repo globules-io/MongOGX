@@ -280,7 +280,7 @@ OGX.Mongogx = class{
                 
             case OGX.Mongogx.LOCAL_STORAGE:
             case OGX.Mongogx.SESSION_STORAGE:
-            let storage = _getStorage(this.options.storage);
+            let storage = this._getStorage(this.options.storage);
             let data = storage.getItem('mongogx');
 		    if(data){
 				if(that.options.encryption){
@@ -333,7 +333,7 @@ OGX.Mongogx = class{
                 
             case OGX.Mongogx.LOCAL_STORAGE:
             case OGX.Mongogx.SESSION_STORAGE:
-            let storage = _getStorage(this.options.storage); 
+            let storage = this._getStorage(this.options.storage); 
             setTimeout(function(){
                 storage.setItem('mongogx', data);   
             }, that.options.write_concern.delay);            
