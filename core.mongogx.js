@@ -31,6 +31,10 @@ OGX.Mongogx = class{
     static get LOCAL_STORAGE(){
         return 'localStorage';
     }
+
+    static get SESSION_STORAGE(){
+        return 'sessionStorage';
+    }
     
     static get APP_STORAGE(){
         return 'appStorage';    
@@ -245,6 +249,20 @@ OGX.Mongogx = class{
         }
         return arr;
     }
+
+    _getStorage(__storage){
+        let storage;
+        switch(__storage){
+            case OGX.Mongogx.LOCAL_STORAGE:
+            storage = localStorage;
+            break;
+
+            case OGX.Mongogx.SESSION_STORAGE:
+            storage = sessionStorage;
+            break;
+        }
+        return storage;
+    }
     
 	_loadData(__database, __collection){
         let that = this;
@@ -261,7 +279,9 @@ OGX.Mongogx = class{
             break;                
                 
             case OGX.Mongogx.LOCAL_STORAGE:
-            let data = localStorage.getItem('mongogx');
+            case OGX.Mongogx.SESSION_STORAGE:
+            let storage = _getStorage(this.options.storage);
+            let data = storage.getItem('mongogx');
 		    if(data){
 				if(that.options.encryption){
 					data = that._decrypt(data);
@@ -312,8 +332,10 @@ OGX.Mongogx = class{
             break;
                 
             case OGX.Mongogx.LOCAL_STORAGE:
+            case OGX.Mongogx.SESSION_STORAGE:
+            let storage = _getStorage(this.options.storage); 
             setTimeout(function(){
-                localStorage.setItem('mongogx', data);   
+                storage.setItem('mongogx', data);   
             }, that.options.write_concern.delay);            
             break;
         }        
