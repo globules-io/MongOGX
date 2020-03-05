@@ -51,8 +51,15 @@ OGX.MongogxDatabase = class{
 		if(!this.collections.hasOwnProperty(__name)){
 			return false;
 		}		
-		delete this.collections[a];
+		delete this.collections[__name];
 	}
+
+    clearCollection(__name){
+        if(!this.collections.hasOwnProperty(__name)){
+			return false;
+		}
+        this.collections[__name].remove();
+    }
 	
 	hasCollection(__name){
 		return this.collections.hasOwnProperty(__name);
