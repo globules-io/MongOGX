@@ -113,6 +113,10 @@ OGX.MongogxCollection = class{
 		}
 		return matched;
 	}
+
+    remove(){
+        this.data = {};
+    }
 	
 	//find all documents matchin that query 1st
 	find(__query, __limit){	        
