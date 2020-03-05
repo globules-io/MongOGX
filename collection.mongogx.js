@@ -115,6 +115,7 @@ OGX.MongogxCollection = class{
 
     remove(){
         this.data = {};
+        return true;
     }
 	
 	//find all documents matchin that query 1st

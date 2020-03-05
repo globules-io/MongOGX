@@ -131,6 +131,17 @@ OGX.Mongogx = class{
 		}
 		return false;
 	}
+
+    clearCollection(__name){
+        if(!this.database){
+			return false;
+		}
+        let clear = this.data.db[this.database].clearCollection(__name);
+        if(clear){           
+			this._write();
+			return true;		
+        }
+    }
 	
 	/*QUERY/OPERATIONS*/
 	insert(){
