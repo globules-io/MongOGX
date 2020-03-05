@@ -28,8 +28,7 @@ OGX.MongogxCollection = class{
 		if(!__object.hasOwnProperty('_id')){
 			__object._id = this._genMongoId();
 		}else{
-			//to do : better check if id is valid
-			if(!__object._id.length === 24){
+			if(!this._isMongoId(__object._id)){
 				return false;
 			}
 		}
@@ -124,8 +123,16 @@ OGX.MongogxCollection = class{
 		let match, path, base, matched;
 		let docs = {};
 		let t = 0;
-		//For all docs in this collection
-		for(let _id in this.data){
+		//If we query a single _id here, just filter the targetted document instead of the whole collection
+        let data = this.data;
+        if(__query.hasOwnProperty('_id') && this._isMongoId(__query._id)){
+            if(this.data.hasOwnProperty(__query._id)){
+                data = {};
+                data[__query._id] = this.data[__query._id];
+            }
+        }
+        //For all docs in this collection
+		for(let _id in data){
 			match = true;	
 			matched = false;
 			//for all properties in the query			
@@ -138,7 +145,7 @@ OGX.MongogxCollection = class{
 				If there is shit after any, stop and return that multi nesting find is to do
 				If not supported by mongo (it does't seem to be), then let's not do it (doable but slow, recursions of x arrays)				
 				*/
-				base = this.data[_id];
+				base = data[_id];
 				path = prop.split('.');		
 				if(path.length > 1){
 					while(path.length > 0){	
@@ -204,7 +211,7 @@ OGX.MongogxCollection = class{
 				}
 			}
 			if(match){
-				docs[_id] = this.data[_id];
+				docs[_id] = data[_id];
 				t++;
 				if(__limit > 0 && __limit === t){
 					return docs;
@@ -433,6 +440,10 @@ OGX.MongogxCollection = class{
 		}
 		return rnd;		
 	}
+
+    _isMongoId(__id){
+        return (typeof(__id) === 'string' && __id.match(/[a-z0-9]{24}/g));
+    }
 	
 };	
 	
