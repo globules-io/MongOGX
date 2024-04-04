@@ -249,6 +249,17 @@ OGX.Mongogx = class{
 		}
 		return false;
 	}
+
+    findOne(__query){   
+        if(this._isSet()){
+            let doc = this.data.db[this.database].getCollection().findOne(__query);         
+            if(this.options.format){
+                doc = this._objToArr(doc)[0];
+                return doc;
+            }
+		}
+		return false;
+    }     
 	
 	/*INTERNAL STUFF*/
     _objToArr(__obj){
@@ -256,7 +267,7 @@ OGX.Mongogx = class{
         for(let a in __obj){
             if(__obj.hasOwnProperty(a)){
                 arr.push(__obj[a]);
-            }
+            }            
         }
         return arr;
     }

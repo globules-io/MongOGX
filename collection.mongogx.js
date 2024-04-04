@@ -146,6 +146,14 @@ OGX.MongogxCollection = class{
 				If there is shit after any, stop and return that multi nesting find is to do
 				If not supported by mongo (it does't seem to be), then let's not do it (doable but slow, recursions of x arrays)				
 				*/
+
+                //if direct prop/val pair, convert to eq
+                if(typeof(__query[prop]) !== 'object'){
+                    var f = {};
+                    f = {eq:__query[prop]};
+                    __query[prop] = f;
+                } 
+
 				base = data[_id];
 				path = prop.split('.');		
 				if(path.length > 1){
@@ -221,7 +229,10 @@ OGX.MongogxCollection = class{
 		}
 		return docs;
 	}
-	
+
+    findOne(__query){
+        return this.find(__query, 1);       
+    }	
 		
 	//Return as array
 	toJSON(){
