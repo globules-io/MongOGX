@@ -306,7 +306,10 @@ OGX.MongogxCollection = class{
 						}
 						break;
 							
-						case 'regex':                            
+						case 'regex':        
+                        if(typeof __value[op] === 'string'){  
+                            __value[op] = new RegExp( __value[op] );
+                        }              
 						match = __obj_value.match(__value[op]);	
 						break;
 							
