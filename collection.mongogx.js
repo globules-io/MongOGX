@@ -145,14 +145,13 @@ OGX.MongogxCollection = class{
 				So, no more eval here, just build path, if you meet array, this is the choice, then stop.
 				If there is shit after any, stop and return that multi nesting find is to do
 				If not supported by mongo (it does't seem to be), then let's not do it (doable but slow, recursions of x arrays)				
-				*/
-
+				*/                
                 //if direct prop/val pair, convert to eq
                 if(typeof(__query[prop]) !== 'object'){
                     var f = {};
-                    f = {eq:__query[prop]};
+                    f = {$eq:__query[prop]};
                     __query[prop] = f;
-                } 
+                }                
 
 				base = data[_id];
 				path = prop.split('.');		
@@ -307,8 +306,8 @@ OGX.MongogxCollection = class{
 						}
 						break;
 							
-						case 'regex':
-						match = (__value[op].match(__obj_value));	
+						case 'regex':                            
+						match = __obj_value.match(__value[op]);	
 						break;
 							
 						case 'mod':
