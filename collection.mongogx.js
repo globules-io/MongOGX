@@ -360,15 +360,22 @@ OGX.MongogxCollection = class{
 	_update(__collection, __update){
 		let match = 0;
 		for(let _id in __collection){
-			let oper, ev, ev2, pre, pro;
-			for(let op in __update){
+			let oper, ev, ev2, pre, pro, val;
+			for(let op in __update){       
+                if(typeof __update[op] !== 'object'){      
+                    __update = {$set:__update};
+                    op = '$set';
+                } 
 				if(op.substr(0,1) === '$'){
-					oper = op.substr(1);
+					oper = op.substr(1);                    
 					for(let prop in __update[op]){
+                        
 						//eval 
 						switch(oper){
 							case 'set':
-							ev = eval('this.data[_id].'+prop+'='+__update[op][prop]);
+                            val = __update[op][prop];
+                            typeof val === 'string' ? val = '"'+val+'"' : null;
+							ev = eval('this.data[_id].'+prop+'='+val);
 							if(typeof(ev) !== 'undefined'){
 								match++;		
 							}	
